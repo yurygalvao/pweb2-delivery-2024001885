@@ -1,8 +1,9 @@
 import { AppError } from '../utils/AppError.js';
 
 export class EntregasService {
-  constructor(entregasRepository) {
+  constructor(entregasRepository, motoristasRepository) {
     this.repository = entregasRepository;
+    this.motoristasRepository = motoristasRepository;
   }
 
   listarTodas(status) {
@@ -79,6 +80,39 @@ export class EntregasService {
     entrega.historico.push({
       data: agora,
       descricao: 'Entrega cancelada'
+    });
+
+    return this.repository.update(entrega);
+  }
+
+  atribuirMotorista(id, motoristaId) {
+    if (!motoristaId) {
+      throw new AppError('O campo motoristaId é obrigatório', 400);
+    }
+
+    const entrega = this.buscarPorId(id);
+
+    const motorista = this.motoristasRepository
+      ? this.motoristasRepository.findById(motoristaId)
+      : null;
+
+    if (!motorista) {
+      throw new AppError('Motorista não encontrado', 404);
+    }
+
+    if (entrega.status !== 'CRIADA') {
+      throw new AppError('Apenas entregas com status CRIADA podem ser atribuídas', 422);
+    }
+
+    if (motorista.status !== 'ATIVO') {
+      throw new AppError('Motorista precisa estar ATIVO para receber atribuição', 422);
+    }
+
+    const agora = new Date().toISOString();
+    entrega.motoristaId = Number(motoristaId);
+    entrega.historico.push({
+      data: agora,
+      descricao: `Atribuída ao motorista ${motorista.nome}`
     });
 
     return this.repository.update(entrega);
