@@ -3,41 +3,40 @@ export class MotoristasController {
     this.service = motoristasService;
   }
 
-  criar = (req, res, next) => {
+  criar = async (req, res, next) => {
     try {
-      const { nome, cpf, placaVeiculo } = req.body;
-      const novoMotorista = this.service.criar({ nome, cpf, placaVeiculo });
-      return res.status(201).json(novoMotorista);
+      const motorista = await this.service.criar(req.body);
+      return res.status(201).json(motorista);
     } catch (error) {
       next(error);
     }
   };
 
-  listar = (req, res, next) => {
+  listar = async (req, res, next) => {
     try {
-      const motoristas = this.service.listarTodos();
-      return res.status(200).json(motoristas);
+      const motoristas = await this.service.listarTodos();
+      return res.json(motoristas);
     } catch (error) {
       next(error);
     }
   };
 
-  buscarPorId = (req, res, next) => {
+  buscarPorId = async (req, res, next) => {
     try {
       const { id } = req.params;
-      const motorista = this.service.buscarPorId(id);
-      return res.status(200).json(motorista);
+      const motorista = await this.service.buscarPorId(id);
+      return res.json(motorista);
     } catch (error) {
       next(error);
     }
   };
 
-  listarEntregas = (req, res, next) => {
+  listarEntregas = async (req, res, next) => {
     try {
       const { id } = req.params;
       const { status } = req.query;
-      const entregas = this.service.listarEntregas(id, status);
-      return res.status(200).json(entregas);
+      const entregas = await this.service.listarEntregas(id, status);
+      return res.json(entregas);
     } catch (error) {
       next(error);
     }
