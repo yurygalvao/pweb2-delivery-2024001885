@@ -6,19 +6,19 @@ export class EntregasService {
     this.motoristasRepository = motoristasRepository;
   }
 
-  listarTodas(status) {
-    return this.repository.findAll(status);
+  async listarTodas(status) {
+    return await this.repository.findAll(status);
   }
 
-  buscarPorId(id) {
-    const entrega = this.repository.findById(id);
+  async buscarPorId(id) {
+    const entrega = await this.repository.findById(id);
     if (!entrega) {
       throw new AppError('Entrega não encontrada', 404);
     }
     return entrega;
   }
 
-  criarEntrega({ descricao, origem, destino }) {
+  async criarEntrega({ descricao, origem, destino }) {
     if (!descricao || !origem || !destino) {
       throw new AppError('Os campos descricao, origem e destino são obrigatórios', 400);
     }
@@ -27,7 +27,7 @@ export class EntregasService {
       throw new AppError('A origem e o destino não podem ser iguais', 400);
     }
 
-    const duplicada = this.repository.findActiveDuplicate(descricao, origem, destino);
+    const duplicada = await this.repository.findActiveDuplicate(descricao, origem, destino);
     if (duplicada) {
       throw new AppError('Já existe uma entrega ativa com a mesma descrição, origem e destino', 409);
     }
@@ -43,11 +43,11 @@ export class EntregasService {
       ]
     };
 
-    return this.repository.create(novaEntrega);
+    return await this.repository.create(novaEntrega);
   }
 
-  avancarStatus(id) {
-    const entrega = this.buscarPorId(id);
+  async avancarStatus(id) {
+    const entrega = await this.buscarPorId(id);
 
     let novoStatus = null;
     if (entrega.status === 'CRIADA') {
@@ -65,11 +65,11 @@ export class EntregasService {
       descricao: `Status alterado para ${novoStatus}`
     });
 
-    return this.repository.update(entrega);
+    return await this.repository.update(entrega);
   }
 
-  cancelarEntrega(id) {
-    const entrega = this.buscarPorId(id);
+  async cancelarEntrega(id) {
+    const entrega = await this.buscarPorId(id);
 
     if (entrega.status === 'ENTREGUE' || entrega.status === 'CANCELADA') {
       throw new AppError(`Não é possível cancelar uma entrega com status ${entrega.status}`, 422);
@@ -82,18 +82,18 @@ export class EntregasService {
       descricao: 'Entrega cancelada'
     });
 
-    return this.repository.update(entrega);
+    return await this.repository.update(entrega);
   }
 
-  atribuirMotorista(id, motoristaId) {
+  async atribuirMotorista(id, motoristaId) {
     if (!motoristaId) {
       throw new AppError('O campo motoristaId é obrigatório', 400);
     }
 
-    const entrega = this.buscarPorId(id);
+    const entrega = await this.buscarPorId(id);
 
     const motorista = this.motoristasRepository
-      ? this.motoristasRepository.findById(motoristaId)
+      ? await this.motoristasRepository.findById(motoristaId)
       : null;
 
     if (!motorista) {
@@ -115,11 +115,11 @@ export class EntregasService {
       descricao: `Atribuída ao motorista ${motorista.nome}`
     });
 
-    return this.repository.update(entrega);
+    return await this.repository.update(entrega);
   }
 
-  obterHistorico(id) {
-    const entrega = this.buscarPorId(id);
+  async obterHistorico(id) {
+    const entrega = await this.buscarPorId(id);
     return entrega.historico;
   }
 }

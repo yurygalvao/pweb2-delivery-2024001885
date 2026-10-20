@@ -1,7 +1,6 @@
 import { Router } from 'express';
-import { Database } from '../database/Database.js';
-import { EntregasRepository } from '../repositories/EntregasRepository.js';
-import { MotoristasRepository } from '../repositories/MotoristasRepository.js';
+import { EntregasRepositoryPrisma } from '../repositories/EntregasRepositoryPrisma.js';
+import { MotoristasRepositoryPrisma } from '../repositories/MotoristasRepositoryPrisma.js';
 import { EntregasService } from '../services/EntregasService.js';
 import { MotoristasService } from '../services/MotoristasService.js';
 import { EntregasController } from '../controllers/EntregasController.js';
@@ -10,10 +9,9 @@ import { MotoristasController } from '../controllers/MotoristasController.js';
 export function criarRotas() {
   const router = Router();
 
-  // Composition Root
-  const database = new Database();
-  const entregasRepo = new EntregasRepository(database);
-  const motoristasRepo = new MotoristasRepository(database);
+  // Composition Root (Injeção de Dependências com Prisma)
+  const entregasRepo = new EntregasRepositoryPrisma();
+  const motoristasRepo = new MotoristasRepositoryPrisma();
 
   const entregasService = new EntregasService(entregasRepo, motoristasRepo);
   const motoristasService = new MotoristasService(motoristasRepo, entregasRepo);
