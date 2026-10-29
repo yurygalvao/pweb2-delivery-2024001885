@@ -1,0 +1,52 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Lista de Entregas</h2>
+  <a href="/entregas/nova" class="btn btn-primary">+ Nova Entrega</a>
+</div>
+
+<form method="GET" action="/entregas" class="row g-3 mb-4">
+  <div class="col-auto">
+    <select name="status" class="form-select">
+      <option value="">Todos os Status</option>
+      <option value="CRIADA" <%= typeof status !== 'undefined' && status === 'CRIADA' ? 'selected' : '' %>>CRIADA</option>
+      <option value="EM_TRANSITO" <%= typeof status !== 'undefined' && status === 'EM_TRANSITO' ? 'selected' : '' %>>EM_TRANSITO</option>
+      <option value="ENTREGUE" <%= typeof status !== 'undefined' && status === 'ENTREGUE' ? 'selected' : '' %>>ENTREGUE</option>
+      <option value="CANCELADA" <%= typeof status !== 'undefined' && status === 'CANCELADA' ? 'selected' : '' %>>CANCELADA</option>
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-secondary">Filtrar</button>
+  </div>
+</form>
+
+<table class="table table-striped table-hover shadow-sm">
+  <thead class="table-dark">
+    <tr>
+      <th>#ID</th>
+      <th>Descrição</th>
+      <th>Origem</th>
+      <th>Destino</th>
+      <th>Status</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (typeof entregas !== 'undefined' && entregas.length > 0) { %>
+      <% entregas.forEach(entrega => { %>
+        <tr>
+          <td>#<%= entrega.id %></td>
+          <td><%= entrega.descricao %></td>
+          <td><%= entrega.origem %></td>
+          <td><%= entrega.destino %></td>
+          <td><span class="badge bg-info"><%= entrega.status %></span></td>
+          <td>
+            <a href="/entregas/<%= entrega.id %>" class="btn btn-sm btn-outline-primary">Detalhes</a>
+          </td>
+        </tr>
+      <% }) %>
+    <% } else { %>
+      <tr>
+        <td colspan="6" class="text-center text-muted">Nenhuma entrega encontrada.</td>
+      </tr>
+    <% } %>
+  </tbody>
+</table>

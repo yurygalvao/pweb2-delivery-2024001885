@@ -1,38 +1,23 @@
 import { Router } from 'express';
-import { EntregasRepositoryPrisma } from '../repositories/EntregasRepositoryPrisma.js';
-import { MotoristasRepositoryPrisma } from '../repositories/MotoristasRepositoryPrisma.js';
-import { EntregasService } from '../services/EntregasService.js';
-import { MotoristasService } from '../services/MotoristasService.js';
-import { EntregasController } from '../controllers/EntregasController.js';
-import { MotoristasController } from '../controllers/MotoristasController.js';
 
-export function criarRotas() {
+export function criarRotas(entregasController, motoristasController) {
   const router = Router();
 
-  // Composition Root (Injeção de Dependências com Prisma)
-  const entregasRepo = new EntregasRepositoryPrisma();
-  const motoristasRepo = new MotoristasRepositoryPrisma();
+  router.get('/', (req, res) => res.redirect('/entregas'));
 
-  const entregasService = new EntregasService(entregasRepo, motoristasRepo);
-  const motoristasService = new MotoristasService(motoristasRepo, entregasRepo);
+  // Entregas
+  router.get('/entregas', (req, res) => entregasController.listar(req, res));
+  router.get('/entregas/nova', (req, res) => entregasController.exibirFormularioCriacao(req, res));
+  router.post('/entregas', (req, res) => entregasController.criar(req, res));
+  router.get('/entregas/:id', (req, res) => entregasController.obterPorId(req, res));
+  router.patch('/entregas/:id/avancar', (req, res) => entregasController.avancarStatus(req, res));
+  router.patch('/entregas/:id/cancelar', (req, res) => entregasController.cancelar(req, res));
+  router.patch('/entregas/:id/atribuir', (req, res) => entregasController.atribuirMotorista(req, res));
 
-  const entregasController = new EntregasController(entregasService);
-  const motoristasController = new MotoristasController(motoristasService);
-
-  // Rotas de Entregas
-  router.post('/entregas', entregasController.criar);
-  router.get('/entregas', entregasController.listar);
-  router.get('/entregas/:id', entregasController.buscarPorId);
-  router.patch('/entregas/:id/avancar', entregasController.avancar);
-  router.patch('/entregas/:id/cancelar', entregasController.cancelar);
-  router.patch('/entregas/:id/atribuir', entregasController.atribuir);
-  router.get('/entregas/:id/historico', entregasController.obterHistorico);
-
-  // Rotas de Motoristas
-  router.post('/motoristas', motoristasController.criar);
-  router.get('/motoristas', motoristasController.listar);
-  router.get('/motoristas/:id', motoristasController.buscarPorId);
-  router.get('/motoristas/:id/entregas', motoristasController.listarEntregas);
+  // Motoristas
+  router.get('/motoristas', (req, res) => motoristasController.listar(req, res));
+  router.get('/motoristas/novo', (req, res) => motoristasController.exibirFormularioCriacao(req, res));
+  router.post('/motoristas', (req, res) => motoristasController.criar(req, res));
 
   return router;
 }

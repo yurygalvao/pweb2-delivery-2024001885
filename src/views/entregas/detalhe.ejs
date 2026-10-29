@@ -1,0 +1,104 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Detalhes da Entrega #<%= entrega.id %></h2>
+    <a href="/entregas" class="btn btn-secondary">Voltar</a>
+  </div>
+
+  <div class="row">
+    <!-- Informações da Entrega -->
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-dark text-white fw-bold">Informações da Entrega</div>
+        <div class="card-body">
+          <p><strong>Descrição:</strong> <%= entrega.descricao %></p>
+          <p><strong>Origem:</strong> <%= entrega.origem %></p>
+          <p><strong>Destino:</strong> <%= entrega.destino %></p>
+          <p><strong>Status:</strong> <span class="badge bg-info text-dark"><%= entrega.status %></span></p>
+          <p><strong>Motorista Atribuído:</strong> 
+            <% 
+              let motNome = 'Nenhum motorista atribuído';
+              if (typeof motoristas !== 'undefined' && motoristas.length > 0 && entrega.motoristaId) {
+                const encontrou = motoristas.find(m => Number(m.id) === Number(entrega.motoristaId));
+                if (encontrou) motNome = encontrou.nome;
+              } else if (entrega.motorista && entrega.motorista.nome) {
+                motNome = entrega.motorista.nome;
+              }
+            %>
+            <%= motNome %>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ações -->
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-dark text-white fw-bold">Ações Disponíveis</div>
+        <div class="card-body d-flex flex-column gap-3">
+          
+          <!-- Avançar Status -->
+          <form action="/entregas/<%= entrega.id %>/avancar?_method=PATCH" method="POST">
+            <button type="submit" class="btn btn-success w-100" <%= (entrega.status === 'ENTREGUE' || entrega.status === 'CANCELADA') ? 'disabled' : '' %>>
+              Avançar Status
+            </button>
+          </form>
+
+          <!-- Cancelar Entrega -->
+          <form action="/entregas/<%= entrega.id %>/cancelar?_method=PATCH" method="POST">
+            <button type="submit" class="btn btn-danger w-100" <%= (entrega.status === 'ENTREGUE' || entrega.status === 'CANCELADA') ? 'disabled' : '' %>>
+              Cancelar Entrega
+            </button>
+          </form>
+
+          <hr>
+
+          <!-- Atribuir Motorista -->
+          <form action="/entregas/<%= entrega.id %>/atribuir?_method=PATCH" method="POST">
+            <label class="form-label fw-bold">Atribuir Motorista</label>
+            <div class="input-group">
+              <select name="motoristaId" class="form-select" required <%= entrega.status !== 'CRIADA' ? 'disabled' : '' %>>
+                <option value="">Selecione um motorista...</option>
+                <% if (typeof motoristas !== 'undefined' && motoristas.length > 0) { %>
+                  <% motoristas.forEach(m => { %>
+                    <option value="<%= m.id %>" <%= Number(entrega.motoristaId) === Number(m.id) ? 'selected' : '' %>>
+                      <%= m.nome %> (CPF: <%= m.cpf %>)
+                    </option>
+                  <% }) %>
+                <% } %>
+              </select>
+              <button type="submit" class="btn btn-primary" <%= entrega.status !== 'CRIADA' ? 'disabled' : '' %>>Salvar</button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Histórico -->
+  <div class="card shadow-sm mt-2">
+    <div class="card-header bg-secondary text-white fw-bold">Histórico de Alterações</div>
+    <div class="card-body">
+      <% 
+        let listaHistorico = [];
+        if (Array.isArray(entrega.historico)) {
+          listaHistorico = entrega.historico;
+        } else if (typeof entrega.historico === 'string') {
+          try { listaHistorico = JSON.parse(entrega.historico); } catch(e) {}
+        }
+      %>
+      <% if (listaHistorico && listaHistorico.length > 0) { %>
+        <ul class="list-group">
+          <% listaHistorico.forEach(item => { %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span><%= item.descricao %></span>
+              <small class="text-muted"><%= item.data ? new Date(item.data).toLocaleString('pt-BR') : '' %></small>
+            </li>
+          <% }) %>
+        </ul>
+      <% } else { %>
+        <p class="text-muted mb-0">Nenhum histórico registrado.</p>
+      <% } %>
+    </div>
+  </div>
+</div>

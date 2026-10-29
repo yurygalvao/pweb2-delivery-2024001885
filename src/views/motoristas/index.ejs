@@ -1,0 +1,27 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>🚚 Motoristas</h2>
+  <a href="/motoristas/novo" class="btn btn-primary">+ Novo Motorista</a>
+</div>
+
+<% if (motoristas.length === 0) { %>
+  <p class="text-muted">Nenhum motorista cadastrado.</p>
+<% } else { %>
+  <table class="table table-striped table-hover align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>CPF</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% motoristas.forEach(motorista => { %>
+        <tr>
+          <td><%= motorista.id %></td>
+          <td><%= motorista.nome %></td>
+          <td><%= motorista.cpf %></td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+<% } %>
